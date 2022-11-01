@@ -1,7 +1,11 @@
+.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+telegram_module/__pycache__/
+scraper/__pycache__/
 
 # C extensions
 *.so

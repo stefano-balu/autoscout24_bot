@@ -1,0 +1,5 @@
+aiogram==2.22.2
+beautifulsoup4==4.11.1
+python-dotenv==0.21.0
+requests==2.27.1
+lxml==4.8.0
