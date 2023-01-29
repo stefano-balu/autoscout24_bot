@@ -13,5 +13,4 @@ Telegram bot for autoscout24.it written in Python which scrapes (for research pu
     - DB_URL = database url (default is "sqlite:///auto_scout24.db")
     - WAIT_BEFORE_NEXT = seconds to wait before the next search (default is 120)
     - WAIT_BEFORE_NEXT_PAGE = seconds to wait before the next page search (default is 10)
-    - EXECUTE_ONCE = stop the bot after the first execution (default is False)
 - Run the main.py

@@ -1,0 +1,9 @@
+{
+  "URLS": [
+    "https://www.autoscout24.it/lst/your-search"
+  ],
+  "MAX_PAGES": 1,
+  "WAIT_BEFORE_NEXT": 3600,
+  "API_TOKEN": "",
+  "CHAT_ID": ""
+}
