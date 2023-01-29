@@ -70,10 +70,10 @@ def start(urls, db):
     :param db: database session
     :return: ID of the last scraped listing
     """
-    stop = False
-    n_page = 0
-
     for n, url in enumerate(urls, start=1):
+        stop = False
+        n_page = 0
+
         while not stop:
             n_page += 1
             stop, results = scraper.scrape(f"{url}&page={n_page}", db)
@@ -108,8 +108,6 @@ def start(urls, db):
 
             if not stop:
                 time.sleep(config.WAIT_BEFORE_NEXT_PAGE)
-
-        logger.info(f"scraped {n_page} pages")
 
 
 if __name__ == '__main__':
