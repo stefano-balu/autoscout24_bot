@@ -35,7 +35,7 @@ def scrape(url, db):
             'id': listing.get('id'),
             'title': listing.find('h2').contents[0] + " " + (listing.find('h2').next_sibling.string if listing.find('h2').next_sibling.string else ""),
             'price_euro': all_paragraphs[0].string.split("€")[1].split(",")[0].lstrip(),
-            'classification': all_paragraphs[1].string,
+            'classification': all_paragraphs[1].string if len(all_paragraphs) > 1 else None,
             'kilometers': all_spans[1].string,
             'year': all_spans[2].string,
             'horsepower': all_spans[3].string,
