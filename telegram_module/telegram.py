@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('telegram')
 
 
-class Telegram_Bot:
+class TelegramBot:
     def __init__(self, api_token, chat_id):
         self.bot = Bot(token=api_token, parse_mode=types.ParseMode.HTML)
         self.dp = Dispatcher(self.bot)
@@ -29,8 +29,7 @@ class Telegram_Bot:
         except exceptions.ChatNotFound:
             log.error(f"Target [ID:{user_id}]: invalid user ID")
         except exceptions.RetryAfter as e:
-            log.error(
-                f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
+            log.error(f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
             await asyncio.sleep(e.timeout)
             return await send_message(user_id, text)  # Recursive call
         except exceptions.UserDeactivated:

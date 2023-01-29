@@ -19,11 +19,10 @@ def start(url, last_id, bot):
     n_page = 0
     found_previous_id = False
 
-    while(not found_previous_id):
+    while not found_previous_id:
         n_page += 1
         # Build the url with the page number
-        found_previous_id, results = scraper.scrape(
-            f"{url}&page={n_page}", last_id)
+        found_previous_id, results = scraper.scrape(f"{url}&page={n_page}", last_id)
 
         # Build and send the messages via telegram
         for res in results:
@@ -45,10 +44,7 @@ def start(url, last_id, bot):
             ]
             message = ''.join(message)
             dp = bot.get_dispatcher()
-            executor.start(
-                dp,
-                bot.broadcaster(message)
-            )
+            executor.start(dp, bot.broadcaster(message))
             time.sleep(3)
 
         # Save the previous last id and update the last id
@@ -65,12 +61,12 @@ def start(url, last_id, bot):
 
 
 # Initialize and start the scraping
-if(not(getenv("API_TOKEN") and getenv('CHAT_ID') and getenv("URL"))):
+if not(getenv("API_TOKEN") and getenv('CHAT_ID') and getenv("URL")):
     print('One or more environment variables are missing!')
 else:
     last_id = ""
-    bot = telegram.Telegram_Bot(getenv("API_TOKEN"), getenv('CHAT_ID'))
+    bot = telegram.TelegramBot(getenv("API_TOKEN"), getenv('CHAT_ID'))
     
-    while(True):
+    while True:
         last_id = start(getenv("URL"), last_id, bot)
         time.sleep(int(getenv("WAIT_BEFORE_NEXT", 120)))

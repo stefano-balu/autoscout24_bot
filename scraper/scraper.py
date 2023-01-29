@@ -1,6 +1,12 @@
 from requests import request
 from bs4 import BeautifulSoup
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('telegram')
+
+
+REQUEST_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:106.0) Gecko/20100101 Firefox/106.0'}
+
 
 def scrape(url, last_id):
     """
@@ -10,8 +16,7 @@ def scrape(url, last_id):
     :param last_id: ID of the last listing from the previously scraped results
     :return: Array of car listings
     """
-    res = request('get', url, headers={
-                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:106.0) Gecko/20100101 Firefox/106.0'})
+    res = request('get', url, headers=REQUEST_HEADERS)
     if res.ok:
         soup = BeautifulSoup(res.text, 'lxml')
         listings = soup.find_all("article")
@@ -39,7 +44,6 @@ def scrape(url, last_id):
                     'seller_location': all_spans[-1].string if all_spans[-1].string else "-",
                     'url': "https://www.autoscout24.it" + listing.find('a').get('href')
                 }
-                #auto['image'] = "".join(listing.find('img').get('src').rsplit("/")[:-1]) if listing.find('img') and len(next(listing.find('div').children).contents) > 0 else "-"
                 to_return.append(auto)
             else:
                 found_previous_id = True
