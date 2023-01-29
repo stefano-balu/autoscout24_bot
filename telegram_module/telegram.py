@@ -1,10 +1,11 @@
 import asyncio
-import logging
+
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import exceptions
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger('telegram')
+from utils import get_logger
+
+logger = get_logger()
 
 
 class TelegramBot:
@@ -25,19 +26,19 @@ class TelegramBot:
         try:
             await self.bot.send_message(user_id, text, disable_notification=disable_notification)
         except exceptions.BotBlocked:
-            log.error(f"Target [ID:{user_id}]: blocked by user")
+            logger.error(f"Target [ID:{user_id}]: blocked by user")
         except exceptions.ChatNotFound:
-            log.error(f"Target [ID:{user_id}]: invalid user ID")
+            logger.error(f"Target [ID:{user_id}]: invalid user ID")
         except exceptions.RetryAfter as e:
-            log.error(f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
+            logger.error(f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
             await asyncio.sleep(e.timeout)
-            return await send_message(user_id, text)  # Recursive call
+            return await self.send_message(user_id, text)  # Recursive call
         except exceptions.UserDeactivated:
-            log.error(f"Target [ID:{user_id}]: user is deactivated")
+            logger.error(f"Target [ID:{user_id}]: user is deactivated")
         except exceptions.TelegramAPIError:
-            log.exception(f"Target [ID:{user_id}]: failed")
+            logger.exception(f"Target [ID:{user_id}]: failed")
         else:
-            log.info(f"Target [ID:{user_id}]: success")
+            logger.info(f"Target [ID:{user_id}]: success")
             return True
         return False
 
@@ -51,7 +52,7 @@ class TelegramBot:
         try:
             await self.send_message(str(self.chat_id), message)
         finally:
-            log.info("Message successfully sent.")
+            logger.info("Message successfully sent.")
 
     def get_dispatcher(self):
         """

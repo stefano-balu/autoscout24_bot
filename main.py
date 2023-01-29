@@ -1,28 +1,37 @@
-from dotenv import load_dotenv
-load_dotenv()
-from os import getenv
-from telegram_module import telegram
-from aiogram.utils import executor
-from scraper import scraper
 import time
+from os import getenv
+
+from aiogram.utils import executor
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from database.models import Base
+from scraper import scraper
+from telegram_module import telegram
+from utils import get_logger
+
+load_dotenv()
+
+logger = get_logger()
 
 
-def start(url, last_id, bot):
+def start(url, db):
     """
     Control the scraping process
 
     :param url: Url to scrape
-    :param last_id: ID of the last listing from the previously scraped results
-    :param bot: Instance of the Telegram bot
+    :param db: database session
     :return: ID of the last scraped listing
     """
     n_page = 0
-    found_previous_id = False
 
-    while not found_previous_id:
+    while True:
         n_page += 1
-        # Build the url with the page number
-        found_previous_id, results = scraper.scrape(f"{url}&page={n_page}", last_id)
+        stop, results = scraper.scrape(f"{url}&page={n_page}", db)
+
+        if stop:
+            break
 
         # Build and send the messages via telegram
         for res in results:
@@ -42,31 +51,32 @@ def start(url, last_id, bot):
                 f"<b>PREZZO</b>: €{res['price_euro']}\n",
                 f"\n<a href='{res['url']}'>Link</a>"
             ]
+            logger.info("Found new car: %s", res)
             message = ''.join(message)
             dp = bot.get_dispatcher()
             executor.start(dp, bot.broadcaster(message))
-            time.sleep(3)
+            time.sleep(1)
 
-        # Save the previous last id and update the last id
-        previous_last_id = last_id
-        if len(results) != 0:
-            last_id = results[0]['id']
+        time.sleep(int(getenv("WAIT_BEFORE_NEXT_PAGE", 10)))
 
-        # If the previous last was empty, it means it's the first request
-        # By design, the first request only scrapes the first page
-        if previous_last_id == "":
-            break
-    print(f"scraped {n_page} pages")
-    return last_id
+    logger.info(f"scraped {n_page} pages")
 
 
-# Initialize and start the scraping
-if not(getenv("API_TOKEN") and getenv('CHAT_ID') and getenv("URL")):
-    print('One or more environment variables are missing!')
-else:
-    last_id = ""
+if __name__ == '__main__':
+    if not(getenv("API_TOKEN") and getenv('CHAT_ID') and getenv("URL")):
+        raise Exception('One or more environment variables are missing!')
+
     bot = telegram.TelegramBot(getenv("API_TOKEN"), getenv('CHAT_ID'))
-    
+    engine = create_engine(getenv("DB_URL", "sqlite:///auto_scout24.db"))
+    Base.metadata.create_all(bind=engine)
+    session = sessionmaker(bind=engine)()
+
     while True:
-        last_id = start(getenv("URL"), last_id, bot)
+        session.begin()
+        start(getenv("URL"), session)
+        session.close()
+
+        if getenv("EXECUTE_ONCE", "false").lower() == "true":
+            break
+
         time.sleep(int(getenv("WAIT_BEFORE_NEXT", 120)))
